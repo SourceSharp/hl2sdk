@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -16,7 +16,7 @@ class KeyValues;
 
 class HKeySymbol
 {
-	HKeySymbol() : nIndex(~0) { }
+	HKeySymbol() : nIndex(~0u) { }
 	HKeySymbol(uint32 idx) : nIndex(idx) { }
 
 	inline uint32 Get() { return nIndex; }

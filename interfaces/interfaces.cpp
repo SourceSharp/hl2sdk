@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: A higher level link library for general use in the game and tools.
 //
@@ -407,6 +407,7 @@ InterfaceReg::InterfaceReg(InstantiateInterfaceFn fn, const char *pName) :
 // This is the primary exported function by a dll, referenced by name via dynamic binding
 // that exposes an opqaue function pointer to the interface.
 // ------------------------------------------------------------------------------------ //
+#if 0
 void* CreateInterface(const char *pName, int *pReturnCode)
 {
 	InterfaceReg *pCur;
@@ -429,3 +430,4 @@ void* CreateInterface(const char *pName, int *pReturnCode)
 	}
 	return NULL;
 }
+#endif

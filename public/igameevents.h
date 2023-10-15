@@ -69,7 +69,7 @@ struct GameEventKeySymbol_t
 		if (!keyName || !keyName[0])
 			return;
 
-		m_nHashCode = MurmurHash2LowerCase(keyName, strlen(keyName), 0x31415926);
+		m_nHashCode = MurmurHash2LowerCase(keyName, static_cast<int>(strlen(keyName)), 0x31415926);
 		m_pszKeyName = keyName;
 
 #if 0
