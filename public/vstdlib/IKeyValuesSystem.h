@@ -16,7 +16,8 @@ class KeyValues;
 
 class HKeySymbol
 {
-	HKeySymbol() : nIndex(~0u) { }
+public:
+	HKeySymbol() : nIndex(~0) { }
 	HKeySymbol(uint32 idx) : nIndex(idx) { }
 
 	inline uint32 Get() { return nIndex; }
