@@ -11,17 +11,19 @@
 #include "tier1/utldict.h"
 #include "tier1/utlmap.h"
 #include "tier1/utlhashtable.h"
-#include <tier1/utldelegate.h>
+#include "tier1/utldelegate.h"
 #include "tier1/utlscratchmemory.h"
 #include "tier1/utlstring.h"
 #include "networksystem/inetworkserializer.h"
 #include "vscript/ivscript.h"
 #include "eiface.h"
+#include "resourcefile/resourcetype.h"
 #include "baseentity.h"
 #include "entityhandle.h"
 #include "concreteentitylist.h"
 #include "entitydatainstantiator.h"
 
+class CKeyValues3Context;
 class CEntityClass;
 class CEntityComponentHelper;
 class CEntityKeyValues;
@@ -160,36 +162,6 @@ struct CEntityPrecacheContext
 	IEntityResourceManifest* m_pManifest;
 };
 
-// Resource data //
-
-struct ResourceNameInfo_t
-{
-	CUtlSymbolLarge m_ResourceNameSymbol;
-};
-
-typedef const ResourceNameInfo_t *ResourceNameHandle_t;
-
-typedef uint16 LoadingResourceIndex_t;
-
-typedef char ResourceTypeIndex_t;
-
-typedef uint32 ExtRefIndex_t;
-
-struct ResourceBindingBase_t
-{
-	void* m_pData;
-	ResourceNameHandle_t m_Name;
-	uint16 m_nFlags;
-	uint16 m_nReloadCounter;
-	ResourceTypeIndex_t m_nTypeIndex;
-	uint8 m_nPadding;
-	LoadingResourceIndex_t m_nLoadingResource;
-	CInterlockedInt m_nRefCount;
-	ExtRefIndex_t m_nExtRefHandle;
-};
-
-typedef const ResourceBindingBase_t* ResourceHandle_t;
-
 struct SecondaryPrecacheMemberCallback_t
 {
 	void (CEntityInstance::*pfnPrecache)(ResourceHandle_t hResource, const CEntityPrecacheContext* pContext);
@@ -222,10 +194,10 @@ abstract_class IEntityResourceManifestBuilder
 public:
 	virtual void		BuildResourceManifest(SpawnGroupHandle_t hSpawnGroup, int nCount, const EntitySpawnInfo_t *pEntities, const matrix3x4a_t *vWorldOffset, IEntityPrecacheConfiguration* pConfig, IEntityResourceManifest* pResourceManifest) = 0;
 	virtual void		BuildResourceManifest(SpawnGroupHandle_t hSpawnGroup, int iCount, const CEntityKeyValues *pKeyValues, IEntityPrecacheConfiguration* pConfig, IEntityResourceManifest* pResourceManifest) = 0;
-	virtual void		BuildResourceManifest(SpawnGroupHandle_t hSpawnGroup, const CUtlVector<const CEntityKeyValues*>* pEntityKeyValues, const char* pFilterName, IEntityPrecacheConfiguration* pConfig, IEntityResourceManifest* pResourceManifest) = 0;
+	virtual void		BuildResourceManifest(SpawnGroupHandle_t hSpawnGroup, const CUtlVector<const CEntityKeyValues*>* pEntityKeyValues, const char* pFilterName /* Usually, "mapload" and "cs_respawn"/"respawn". See CSpawnGroupEntityFilterRegistrar ctors */, IEntityPrecacheConfiguration* pConfig, IEntityResourceManifest* pResourceManifest) = 0;
 	virtual void		BuildResourceManifest(const char* pManifestNameOrGroupName, IEntityPrecacheConfiguration* pConfig, IEntityResourceManifest* pResourceManifest) = 0;
 	virtual void		BuildResourceManifest(EntityResourceManifestCreationCallback_t callback, void* pContext, IEntityPrecacheConfiguration* pConfig, IEntityResourceManifest* pResourceManifest) = 0;
-	virtual void		BuildResourceManifestForEntity(const char* pEntityDesignerName, IEntityPrecacheConfiguration* pConfig, IEntityResourceManifest* pResourceManifest, CUtlScratchMemoryPool* pKeyValuesMemoryPool) = 0;
+	virtual void		BuildResourceManifestForEntity(const char* pEntityDesignerName, IEntityPrecacheConfiguration* pConfig, IEntityResourceManifest* pResourceManifest, CKeyValues3Context* pEntityAllocator) = 0;
 	virtual void		InvokePrecacheCallback(ResourceHandle_t hResource, const EntitySpawnInfo_t* info, IEntityPrecacheConfiguration* pConfig, IEntityResourceManifest* pResourceManifest, SecondaryPrecacheMemberCallback_t callback) = 0;
 	virtual void		AddRefKeyValues(const CEntityKeyValues* pKeyValues) = 0;
 	virtual void		ReleaseKeyValues(const CEntityKeyValues* pKeyValues) = 0;
@@ -255,8 +227,8 @@ class CEntitySystem : public IEntityResourceManifestBuilder
 
 	struct DormancyChangeInfo_t
 	{
-		CEntityInstance* m_pEnt;
-		bool m_bDormant;
+		CEntityHandle m_hEnt;
+		bool m_bInPVS;
 	};
 
 	struct MurmurHash2HashFunctor
@@ -271,7 +243,7 @@ public:
 	virtual void				OnEntityParentChanged(CEntityInstance* pEntity, CEntityInstance* pNewParent) = 0; // empty function
 	virtual void				OnAddEntity(CEntityInstance* pEnt, CEntityHandle handle) = 0; // empty function
 	virtual void				OnRemoveEntity(CEntityInstance* pEnt, CEntityHandle handle) = 0; // empty function
-	virtual int					GetSpawnGroupWorldId(SpawnGroupHandle_t hSpawnGroup) = 0; // returns 0
+	virtual WorldGroupId_t		GetSpawnGroupWorldId(SpawnGroupHandle_t hSpawnGroup) = 0;
 	virtual void				Spawn(int nCount, const EntitySpawnInfo_t* pInfo) = 0;
 	virtual void				Activate(int nCount, const EntityActivation_t* pActivates, ActivateType_t activateType) = 0;
 	virtual void				PostDataUpdate(int nCount, const PostDataUpdateInfo_t *pInfo) = 0;
@@ -324,21 +296,21 @@ public:
 	CUtlMap<CUtlSymbolLarge, CUtlVector<CEntityHandle>*> m_entityNames; // 2800
 	CEventQueue m_EventQueue; // 2832
 	CUtlVectorFixedGrowable<IEntityIONotify*, 2> m_entityIONotifiers; // 2968 | 2984
-	int m_Unk1; // 3008 | 3024
+	int m_nSuppressDormancyChangeCount; // 3008 | 3024
 	NetworkSerializationMode_t m_eNetworkSerializationMode; // 3012 | 3028
-	int m_Unk2; // 3016 | 3032
-	int m_Unk3; // 3020 | 3036
-	int m_Unk4; // 3024 | 3040
-	int m_Unk5; // 3028 | 3044
+	int m_nExecuteQueuedCreationDepth; // 3016 | 3032
+	int m_nExecuteQueuedDeletionDepth; // 3020 | 3036
+	int m_nSuppressDestroyImmediateCount; // 3024 | 3040
+	int m_nSuppressAutoDeletionExecutionCount; // 3028 | 3044
 	int m_nEntityKeyValuesAllocatorRefCount; // 3032 | 3048
 	float m_flChangeCallbackSpewThreshold; // 3036 | 3052
-	bool m_Unk6; // 3040 | 3056
-	bool m_Unk7; // 3041 | 3057
-	bool m_Unk8; // 3042 | 3058
-	bool m_Unk9; // 3043 | 3059
-	bool m_Unk10; // 3044 | 3060
-	bool m_Unk11; // 3045 | 3061
-	bool m_Unk12; // 3046 | 3062
+	bool m_Unk1; // 3040 | 3056
+	bool m_Unk2; // 3041 | 3057
+	bool m_Unk3; // 3042 | 3058
+	bool m_bEnableAutoDeletionExecution; // 3043 | 3059
+	bool m_Unk4; // 3044 | 3060
+	bool m_Unk5; // 3045 | 3061
+	bool m_Unk6; // 3046 | 3062
 	CUtlVector<CreationInfo_t> m_queuedCreations; // 3048 | 3064
 	CUtlVector<PostDataUpdateInfo_t> m_queuedPostDataUpdates; // 3072 | 3088
 	CUtlVector<DestructionInfo_t> m_queuedDeletions; // 3096 | 3112
@@ -384,7 +356,7 @@ public:
 	CUtlVector<IEntityListener*> m_entityListeners; // 5448 | 5496
 	IEntity2SaveRestore* m_pEntity2SaveRestore; // 5472 | 5520
 	IEntity2Networkables* m_pEntity2Networkables; // 5480 | 5528
-	bool m_Unk13; // 5488 | 5536
+	bool m_Unk7; // 5488 | 5536
 };
 
 abstract_class IEntityFindFilter
@@ -436,6 +408,7 @@ class EntityInstanceByClassIter_t
 {
 public:
 	EntityInstanceByClassIter_t(const char* szClassName, IEntityFindFilter* pFilter = nullptr, EntityIterType_t eIterType = ENTITY_ITER_OVER_ACTIVE);
+	EntityInstanceByClassIter_t(CEntityInstance* pStart, char const* szClassName, IEntityFindFilter* pFilter = nullptr, EntityIterType_t eIterType = ENTITY_ITER_OVER_ACTIVE);
 
 	CEntityInstance* First();
 	CEntityInstance* Next();
