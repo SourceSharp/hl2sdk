@@ -28,7 +28,6 @@
 #include <steam/steamclientpublic.h>
 #include "playerslot.h"
 #include <iloopmode.h>
-#include "network_connection.pb.h"
 
 //-----------------------------------------------------------------------------
 // forward declarations
@@ -303,7 +302,7 @@ public:
 	virtual bool IsClientLowViolence( CPlayerSlot nSlot ) = 0;
 
 	// Kicks the slot with the specified NetworkDisconnectionReason
-	virtual void DisconnectClient( CPlayerSlot nSlot, ENetworkDisconnectionReason reason ) = 0;
+	virtual void DisconnectClient( CPlayerSlot nSlot, int reason ) = 0;
 
 #if 0 // Don't really match the binary
 	virtual void GetAllSpawnGroupsWithPVS( CUtlVector<SpawnGroupHandle_t> *spawnGroups, CUtlVector<IPVS *> *pOut ) = 0;
@@ -327,7 +326,7 @@ public:
 	// Kicks and bans the slot.
     // Note that the internal reason is never displayed to the user.
 	// ENetworkDisconnectionReason reason is ignored, client is always kicked with ENetworkDisconnectionReason::NETWORK_DISCONNECT_KICKBANADDED
-    virtual void BanClient( CPlayerSlot nSlot, const char *szInternalReason, ENetworkDisconnectionReason reason ) = 0;
+    virtual void BanClient( CPlayerSlot nSlot, const char *szInternalReason, int reason ) = 0;
 
 	virtual void unk200() = 0;
 	virtual void unk201() = 0;
@@ -558,7 +557,7 @@ public:
 	virtual void			ClientFullyConnect( CPlayerSlot slot ) = 0;
 
 	// Client is disconnecting from server
-	virtual void			ClientDisconnect( CPlayerSlot slot, ENetworkDisconnectionReason reason,
+	virtual void			ClientDisconnect( CPlayerSlot slot, int reason,
 								const char *pszName, uint64 xuid, const char *pszNetworkID ) = 0;
 
 	// Sets the client index for the client who typed the command into his/her console
