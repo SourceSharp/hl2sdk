@@ -320,7 +320,7 @@ public:
     virtual void unk106()                                                                           = 0;
     virtual void unk107()                                                                           = 0;
 
-    virtual void KickClient(CPlayerSlot nSlot, const char* szInternalReason, ENetworkDisconnectionReason reason) = 0;
+    virtual void KickClient(CPlayerSlot nSlot, const char* szInternalReason, int reason) = 0;
     virtual void BanClient(CPlayerSlot nSlot, float flDuration, bool bKick)                                      = 0;
     virtual void BanClient(CSteamID steamId, float flDuration, bool bKick)                                       = 0;
 

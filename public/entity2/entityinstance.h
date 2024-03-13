@@ -7,7 +7,7 @@
 #include "tier1/utlsymbollarge.h"
 #include "entity2/entitycomponent.h"
 #include "entity2/entityidentity.h"
-#include "variant.h"
+//#include "variant.h"
 
 class CEntityKeyValues;
 class CFieldPath;
@@ -36,7 +36,7 @@ public:
 	virtual void OnSetDormant( /*EntityDormancyType_t*/int prevDormancyType, /*EntityDormancyType_t*/int newDormancyType ) = 0;
 
 	virtual void* ScriptEntityIO() = 0;
-	virtual int ScriptAcceptInput( const CUtlSymbolLarge &sInputName, CEntityInstance* pActivator, CEntityInstance* pCaller, const variant_t &value, int nOutputID ) = 0;
+	virtual int ScriptAcceptInput( const CUtlSymbolLarge &sInputName, CEntityInstance* pActivator, CEntityInstance* pCaller, const class variant_t* value, int nOutputID ) = 0;
 	
 	virtual void PreDataUpdate( /*DataUpdateType_t*/int updateType ) = 0;
 	
