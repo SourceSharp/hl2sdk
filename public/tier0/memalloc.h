@@ -68,6 +68,13 @@
 #define MEMALLOC_REGION_FREE_5		'='
 #define MEMALLOC_REGION_FREE_6		'?'
 
+enum MemAllocAttribute_t
+{
+	MemAllocAttribute_Unk0 = 0,
+	MemAllocAttribute_Unk1 = 1,
+	MemAllocAttribute_Unk2 = 2
+};
+
 enum MemoryState
 {
 	MemoryState_UnexpectedlyAllocated = 0,
@@ -170,14 +177,10 @@ public:
 	// AMNOTE: Stub
 	virtual void unk002() = 0;
 
-	// AMNOTE: Stub, returns false and writes -1 to the ret_out
-	virtual bool unk003( int *ret_out ) = 0;
-
-	// AMNOTE: Stub, returns false
-	virtual bool unk004() = 0;
-
-	// AMNOTE: Stub
-	virtual void unk005() = 0;
+	// AMNOTE: Used by the CMemoryStack::Init
+	virtual void *LockAllocStatsForCurrentStack( uint32 &allocid, bool ) = 0;
+	virtual void *LockAllocStats( uint32 allocid ) = 0;
+	virtual void UnlockAllocStats( uint32 allocid ) = 0;
 
 	virtual void CompactOnFail() = 0;
 
@@ -236,7 +239,7 @@ public:
 	virtual int unk101() = 0;
 
 	// AMNOTE: Stub
-	virtual void unk102() = 0;
+	virtual void unk102( void *pMem, MemAllocAttribute_t alloc_attribute, int unk ) = 0;
 
 	// AMNOTE: Copies data to an unknown struct of byte size 56
 	// Returns true if data was written, false otherwise

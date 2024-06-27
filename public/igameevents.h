@@ -23,6 +23,8 @@
 #include "entity2/entityinstance.h"
 
 class CMsgSource1LegacyGameEvent;
+template<typename PROTO_TYPE>
+class CNetMessagePB;
 class CPlayerSlot;
 class CBasePlayer;
 class CEntityIndex;
@@ -71,11 +73,6 @@ typedef CKV3MemberName GameEventKeySymbol_t;
 
 class KeyValues;
 class CGameEvent;
-
-abstract_class IToolGameEventAPI
-{
-	virtual void unk001( void * ) = 0;
-};
 
 abstract_class IGameEvent
 {
@@ -149,7 +146,7 @@ public:
 	virtual void FireGameEvent( IGameEvent *event ) = 0;
 };
 
-abstract_class IGameEventManager2 : public IBaseInterface, public IToolGameEventAPI
+abstract_class IGameEventManager2 : public IBaseInterface
 {
 public:
 	virtual	~IGameEventManager2( void ) {};
@@ -186,8 +183,8 @@ public:
 	virtual void FreeEvent( IGameEvent *event ) = 0;
 
 	// write/read event to/from bitbuffer
-	virtual bool SerializeEvent( IGameEvent *event, CMsgSource1LegacyGameEvent *ev ) = 0;
-	virtual IGameEvent *UnserializeEvent( const CMsgSource1LegacyGameEvent &ev ) = 0; // create new KeyValues, must be deleted
+	virtual bool SerializeEvent( IGameEvent *event, CNetMessagePB<CMsgSource1LegacyGameEvent> *ev ) = 0;
+	virtual IGameEvent *UnserializeEvent( const CNetMessagePB<CMsgSource1LegacyGameEvent> &ev ) = 0; // create new KeyValues, must be deleted
 	
 	virtual int LookupEventId( const char *name ) = 0;
 	
