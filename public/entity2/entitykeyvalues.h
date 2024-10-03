@@ -186,6 +186,9 @@ private:
 		EntityComplexKeyListElem_t* m_pNext;
 	};
 
+template < class T, class I = int32 >
+using CUtlLeanVector32 = CUtlLeanVectorImpl< CUtlLeanVectorBase< T, I >, T, I >;
+
 	CKeyValues3Context* m_pAllocator;
 	EntityComplexKeyListElem_t* m_pComplexKeys;
 	KeyValues3* m_pValues;
@@ -194,7 +197,7 @@ private:
 	int16 m_nQueuedForSpawnCount;
 	bool m_bAllowLogging;
 	EntityKVAllocatorType_t m_eAllocatorType;
-	CUtlLeanVector<EntityIOConnectionDescFat_t> m_connectionDescs;
+	CUtlLeanVector32<EntityIOConnectionDescFat_t> m_connectionDescs;
 };
 
 inline CEntityKeyValues::Iterator_t CEntityKeyValues::First() const
