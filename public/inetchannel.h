@@ -67,18 +67,9 @@ abstract_class INetChannel : public INetChannelInfo
 public:
     virtual ~INetChannel(void){};
 
-	virtual void	Reset( void ) = 0;
-	virtual void	Clear( void ) = 0;
-	virtual void	Shutdown( ENetworkDisconnectionReason reason ) = 0;
-	
-	virtual HSteamNetConnection GetSteamNetConnection( void ) const = 0;
-	
-	virtual bool	SendNetMessage( const CNetMessage *pData, NetChannelBufType_t bufType ) = 0;
-	virtual bool	SendData( bf_write &msg, NetChannelBufType_t bufferType ) = 0;
-	virtual int		Transmit( const char *pDebugName, bf_write *data ) = 0;
-	virtual void	SetBitsToSend( void ) = 0;
-	virtual int		SendMessages( const char *pDebugName, bf_write *data ) = 0;
-	virtual void	ClearBitsToSend( void ) = 0;
+    virtual void Reset(void)                                  = 0;
+    virtual void Clear(void)                                  = 0;
+    virtual void Shutdown(int reason) = 0;
 
     virtual HSteamNetConnection GetSteamNetConnection(void) const = 0;
 
