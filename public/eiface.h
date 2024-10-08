@@ -383,7 +383,7 @@ public:
 abstract_class ISource2Server : public IAppSystem
 {
 public:
-    virtual bool Unknown0() const = 0;
+	virtual bool			unk_001() const = 0;
 
     virtual void SetGlobals(CGlobalVars * pGlobals) = 0;
 
@@ -435,16 +435,18 @@ public:
 
     virtual bool IsPaused(void) const = 0;
 
-    virtual bool                    GetNavMeshData(CNavData * pNavMeshData)                                        = 0;
-    virtual void                    SetNavMeshData(const CNavData* navMeshData)                                    = 0;
-    virtual void                    RegisterNavListener(INavListener * pNavListener)                               = 0;
-    virtual void                    UnregisterNavListener(INavListener * pNavListener)                             = 0;
-    virtual void*                   GetSpawnDebugInterface(void)                                                   = 0;
-    virtual void*                   Unknown1(void)                                                                 = 0;
-    virtual IToolGameSimulationAPI* GetToolGameSimulationAPI(void)                                                 = 0;
-    virtual void                    GetAnimationActivityList(CUtlVector<CUtlString> & activityList)                = 0;
-    virtual void                    GetAnimationEventList(CUtlVector<CUtlString> & eventList)                      = 0;
-    virtual void                    FilterPlayerCounts(int* pInOutHumans, int* pInOutHumansSlots, int* pInOutBots) = 0;
+	virtual bool			GetNavMeshData( CNavData *pNavMeshData ) = 0;
+	virtual void			SetNavMeshData( const CNavData *navMeshData ) = 0;
+	virtual void			RegisterNavListener( INavListener *pNavListener ) = 0;
+	virtual void			UnregisterNavListener( INavListener *pNavListener ) = 0;
+	virtual void			*GetSpawnDebugInterface( void ) = 0;
+
+	virtual void			unk_101() = 0;
+
+	virtual IToolGameSimulationAPI *GetToolGameSimulationAPI( void ) = 0;
+	virtual void			GetAnimationActivityList( CUtlVector<CUtlString> &activityList ) = 0;
+	virtual void			GetAnimationEventList( CUtlVector<CUtlString> &eventList ) = 0;
+	virtual void			FilterPlayerCounts( int *pInOutHumans, int *pInOutHumansSlots, int *pInOutBots ) = 0;
 
     // Called after the steam API has been activated post-level startup
     virtual void GameServerSteamAPIActivated(void) = 0;
@@ -460,17 +462,23 @@ public:
     virtual void GetEconItemsInfoForModel(const char* pModelName, const char* pEconItemName, bool bExcludeItemSets, bool bExcludeIndividualItems, bool bExcludeStockItemSet, CUtlVector<EconItemInfo_t>& econInfo)         = 0;
     virtual void GetEconItemsInfoForCharacter(const char* pCharacterName, const char* pEconItemName, bool bExcludeItemSets, bool bExcludeIndividualItems, bool bExcludeStockItemSet, CUtlVector<EconItemInfo_t>& econInfo) = 0;
 
-    virtual void GetDefaultScaleForModel(const char* pModelName, bool bCheckLoadoutScale)                                            = 0;
-    virtual void GetDefaultScaleForCharacter(const char* pCharacterName, bool bCheckLoadoutScale)                                    = 0;
-    virtual void GetDefaultControlPointAutoUpdates(const char* pParticleSystemName, CUtlVector<EconControlPointInfo_t>& autoUpdates) = 0;
-    virtual void GetCharacterNameForModel(const char* pModelName, bool bCheckItemModifiers, CUtlString& characterName)               = 0;
-    virtual void GetModelNameForCharacter(const char* pCharacterNamel, int nIndex, CBufferString& modelName)                         = 0;
-    virtual void GetCharacterList(CUtlVector<CUtlString> & characterNames)                                                           = 0;
-    virtual void GetDefaultChoreoDirForModel(const char* pModelName, CBufferString& defaultVCDDir)                                   = 0;
+	virtual void			GetDefaultScaleForModel( const char *pModelName, bool bCheckLoadoutScale ) = 0;
+	virtual void			GetDefaultScaleForCharacter( const char *pCharacterName, bool bCheckLoadoutScale ) = 0;
+	virtual void			GetDefaultControlPointAutoUpdates( const char *pParticleSystemName, CUtlVector<EconControlPointInfo_t> &autoUpdates ) = 0;
+
+	virtual void			unk_201();
+
+	virtual void			GetCharacterNameForModel( const char *pModelName, bool bCheckItemModifiers, CUtlString &characterName ) = 0;
+	virtual void			GetModelNameForCharacter( const char *pCharacterNamel, int nIndex, CBufferString &modelName ) = 0;
+	virtual void			GetCharacterList( CUtlVector<CUtlString> &characterNames ) = 0;
+	virtual void			GetDefaultChoreoDirForModel( const char *pModelName, CBufferString &defaultVCDDir ) = 0;
 
     virtual void* GetEconItemSystem(void) = 0;
 
-    virtual void ServerConVarChanged(const char* pVarName, const char* pValue) = 0;
+	virtual void			ServerConVarChanged( const char *pVarName, const char *pValue ) = 0;
+
+	// Returns a list of values and names corresponding to HitGroup_t enum
+	virtual void			GetHitGroupEnumInfo( CUtlVector<int> &values, CUtlVector<CUtlString> &names ) = 0;
 };
 
 //-----------------------------------------------------------------------------
@@ -615,8 +623,10 @@ public:
     // A user has had their network id setup and validated
     virtual void NetworkIDValidated(const char* pszUserName, const char* pszNetworkID) = 0;
 
-    // The client has submitted a keyvalues command
-    virtual void ClientCommandKeyValues(CPlayerSlot slot, KeyValues * pKeyValues) = 0;
+	// The client has submitted a keyvalues command
+	virtual void			ClientCommandKeyValues( CPlayerSlot slot, KeyValues *pKeyValues ) = 0;
+	
+	virtual void			unk001() = 0;
 
     virtual bool ClientCanPause(CPlayerSlot slot) = 0;
 
@@ -630,18 +640,18 @@ public:
 
     virtual IHLTVDirector* GetHLTVDirector(void) = 0;
 
-    virtual void unk002(CPlayerSlot slot) = 0;
-    virtual void unk003(CPlayerSlot slot) = 0;
+	virtual void			unk101( CPlayerSlot slot ) = 0;
+	virtual void			unk102( CPlayerSlot slot ) = 0;
 
-    // Something NetMessage related
-    virtual void unk004() = 0;
+	// Handles incoming usermessages from the client
+	virtual void			ClientSvcUserMessage( CPlayerSlot slot, int um_type, uint32 size, const void *buf ) = 0;
 
-    // Something pawn related
-    virtual void unk005() = 0;
-    virtual void unk006() = 0;
+	// Something pawn related
+	virtual void			unk201() = 0;
+	virtual void			unk202() = 0;
 
-    virtual void unk007() = 0;
-    virtual void unk008() = 0;
+	virtual void			unk203() = 0;
+	virtual void			unk204() = 0;
 };
 
 typedef IVEngineServer2      IVEngineServer;
